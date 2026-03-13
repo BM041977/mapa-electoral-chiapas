@@ -23,9 +23,10 @@ def conectar_db():
 
 
 # -----------------------------
-# CREAR TABLA SI NO EXISTE
+# CREAR TABLA
 # -----------------------------
 def crear_tabla():
+
     conn = conectar_db()
     cursor = conn.cursor()
 
@@ -41,7 +42,29 @@ def crear_tabla():
     conn.close()
 
 
+# -----------------------------
+# CREAR ADMIN AUTOMATICO
+# -----------------------------
+def crear_admin():
+
+    conn = conectar_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM usuarios WHERE usuario='admin'")
+    admin = cursor.fetchone()
+
+    if not admin:
+        cursor.execute(
+            "INSERT INTO usuarios (usuario,password) VALUES (?,?)",
+            ("admin", "chiapas")
+        )
+        conn.commit()
+
+    conn.close()
+
+
 crear_tabla()
+crear_admin()
 
 
 # -----------------------------
@@ -52,8 +75,8 @@ def login():
 
     if request.method == "POST":
 
-        usuario = request.form["usuario"]
-        password = request.form["password"]
+        usuario = request.form["usuario"].strip()
+        password = request.form["password"].strip()
 
         conn = conectar_db()
         cursor = conn.cursor()
