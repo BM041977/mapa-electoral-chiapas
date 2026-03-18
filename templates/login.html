@@ -6,7 +6,9 @@ def login():
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "").strip()
 
-        # 🔐 Validación directa
+        print("USUARIO INGRESADO:", usuario)
+        print("PASSWORD INGRESADO:", password)
+
         if usuario == "Baldemar" and password == "Victoria@Ever":
             session.clear()
             session["logged_in"] = True
