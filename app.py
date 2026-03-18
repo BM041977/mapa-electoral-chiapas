@@ -38,7 +38,7 @@ def login():
 
         return "Usuario o contraseña incorrectos"
 
-    return render_template("login.html")
+    return "LOGIN FUNCIONANDO OK"
 
 # 🗺️ MAPA
 @app.route("/mapa")
