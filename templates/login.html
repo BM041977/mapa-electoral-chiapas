@@ -1,35 +1,7 @@
-<html>
-<head>
-<title>Acceso al sistema</title>
-</head>
+@app.route("/", methods=["GET", "POST"])
+def login():
 
-<body style="text-align:center; font-family:Arial;">
+    if request.method == "POST":
+        return "SI LLEGA AL POST"
 
-<h2>Login del Visor Electoral</h2>
-
-<form method="POST">
-
-Usuario:
-<br>
-<input type="text" name="usuario">
-
-<br><br>
-
-Contraseña:
-<br>
-<input type="password" name="password">
-
-<br><br>
-
-<button type="submit">Entrar</button>
-
-</form>
-
-<br><br>
-
-<p style="font-size:12px; color:gray;">
-Creado por Baldemar Maza León
-</p>
-
-</body>
-</html>
+    return render_template("login.html")
