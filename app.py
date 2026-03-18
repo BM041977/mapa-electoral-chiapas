@@ -3,32 +3,15 @@ import os
 
 app = Flask(__name__)
 
-# 🔐 CLAVE SEGURA
-app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+# 🔐 CLAVE SECRETA (desde Render)
+app.secret_key = os.environ.get("SECRET_KEY", "clave_default")
 
-# 🔒 CONFIGURACIÓN DE SESIÓN
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=True,   # 🔥 PRODUCCIÓN
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_PERMANENT=False
-)
+# 🔐 CONFIGURACIÓN DE SESIÓN
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True
 
-# 🔑 CONTROL TOTAL (DESDE RENDER)
-USUARIO = os.environ.get("APP_USER", "Baldemar")
-PASSWORD = os.environ.get("APP_PASSWORD", "1234")
-
-# 🔒 PROTECCIÓN GLOBAL
-@app.before_request
-def proteger():
-
-    if request.path == "/" or request.path.startswith("/static"):
-        return
-
-    if "usuario" not in session:
-        return redirect(url_for("login"))
-
-# 🔐 EVITAR CACHE (CRÍTICO)
+# 🚫 EVITAR CACHE (CLAVE PARA SEGURIDAD)
 @app.after_request
 def no_cache(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -36,32 +19,41 @@ def no_cache(response):
     response.headers["Expires"] = "0"
     return response
 
+# 🔑 USUARIO Y PASSWORD (desde Render)
+USER = os.environ.get("APP_USER", "admin")
+PASSWORD = os.environ.get("APP_PASSWORD", "1234")
+
+# -------------------------
 # LOGIN
-@app.route("/", methods=["GET", "POST"])
+# -------------------------
+@app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
+        usuario = request.form.get("username")
+        password = request.form.get("password")
 
-        usuario = request.form["usuario"].strip()
-        password = request.form["password"].strip()
-
-        if usuario == USUARIO and password == PASSWORD:
-            session.clear()
-            session["usuario"] = usuario
+        if usuario == USER and password == PASSWORD:
+            session["logged_in"] = True
             return redirect(url_for("mapa"))
         else:
-            return "Acceso denegado"
+            return render_template("login.html", error="Credenciales incorrectas")
 
     return render_template("login.html")
 
-# MAPA
-@app.route("/mapa")
+# -------------------------
+# MAPA (PROTEGIDO)
+# -------------------------
+@app.route("/")
 def mapa():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+
     return render_template("mapa.html")
 
+# -------------------------
 # LOGOUT
+# -------------------------
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
