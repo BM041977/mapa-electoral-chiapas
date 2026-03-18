@@ -6,19 +6,29 @@
 
 <body style="text-align:center; font-family:Arial;">
 
-<h2>Login</h2>
+<h2>Login del Visor Electoral</h2>
 
 <form method="POST" action="/">
 
-    <input type="text" name="usuario" placeholder="Usuario">
-    <br><br>
+Usuario:<br>
+<input type="text" name="usuario" required>
 
-    <input type="password" name="password" placeholder="Contraseña">
-    <br><br>
+<br><br>
 
-    <button type="submit">Entrar</button>
+Contraseña:<br>
+<input type="password" name="password" required>
+
+<br><br>
+
+<button type="submit">Entrar</button>
 
 </form>
+
+<br>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
 
 </body>
 </html>
