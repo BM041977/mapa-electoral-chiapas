@@ -2,6 +2,20 @@
 def login():
 
     if request.method == "POST":
-        return "SI LLEGA AL POST"
+
+        usuario = request.form.get("usuario", "").strip()
+        password = request.form.get("password", "").strip()
+
+        # 🔥 DEBUG (muy importante)
+        print("USUARIO INGRESADO:", usuario)
+        print("PASSWORD INGRESADO:", password)
+
+        # 🔐 VALIDACIÓN
+        if usuario == "Baldemar" and password == "Victoria@Ever":
+            session.clear()
+            session["logged_in"] = True
+            return redirect("/mapa")
+
+        return "Usuario o contraseña incorrectos"
 
     return render_template("login.html")
