@@ -1,27 +1,13 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask
+import os
 
 app = Flask(__name__)
 
-# LOGIN
-@app.route("/", methods=["GET", "POST"])
-def login():
+@app.route("/")
+def home():
+    return "FUNCIONANDO OK"
 
-    if request.method == "POST":
-
-        usuario = request.form.get("usuario")
-        password = request.form.get("password")
-
-        # 🔥 PRUEBA SIN VALIDACIÓN
-        return redirect("/mapa")
-
-    return render_template("login.html")
-
-
-# MAPA
-@app.route("/mapa")
-def mapa():
-    return "MAPA CARGANDO OK"
-
-
+# 🔥 ESTO ES CLAVE PARA RENDER
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
