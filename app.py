@@ -1,11 +1,19 @@
-print("🔥 ESTE ES EL APP CORRECTO 🔥")
 from flask import Flask, render_template, request, redirect, url_for, session
+import os
 
 app = Flask(__name__)
 
-app.secret_key = "clave_super_segura"
+# 🔐 CLAVE SECRETA (desde Render o local)
+app.secret_key = os.environ.get("SECRET_KEY", "clave_local_segura")
 
-# 🔒 NO CACHE
+# 🔑 USUARIO Y PASSWORD (desde Render o local)
+USER = os.environ.get("APP_USER", "Baldemar")
+PASSWORD = os.environ.get("APP_PASSWORD", "Victoria@Ever")
+
+
+# -------------------------------------------------
+# NO CACHE (para que no se vea el mapa al regresar)
+# -------------------------------------------------
 @app.after_request
 def no_cache(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -13,17 +21,25 @@ def no_cache(response):
     response.headers["Expires"] = "0"
     return response
 
-# 🔒 PROTECCIÓN
+
+# -------------------------------------------------
+# PROTEGER TODAS LAS RUTAS
+# -------------------------------------------------
 @app.before_request
 def proteger():
 
+    # permitir login y archivos estáticos
     if request.path == "/" or request.path.startswith("/static"):
         return
 
+    # si no ha iniciado sesión
     if not session.get("logged_in"):
         return redirect(url_for("login"))
 
-# 🔐 LOGIN
+
+# -------------------------------------------------
+# LOGIN
+# -------------------------------------------------
 @app.route("/", methods=["GET", "POST"])
 def login():
 
@@ -32,25 +48,36 @@ def login():
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "").strip()
 
-        if usuario == "Baldemar" and password == "Victoria@Ever":
+        # VALIDACIÓN
+        if usuario == USER and password == PASSWORD:
             session.clear()
             session["logged_in"] = True
             return redirect("/mapa")
 
         return "Usuario o contraseña incorrectos"
 
-    return "LOGIN FUNCIONANDO OK"
+    return render_template("login.html")
 
-# 🗺️ MAPA
+
+# -------------------------------------------------
+# MAPA (protegido)
+# -------------------------------------------------
 @app.route("/mapa")
 def mapa():
     return render_template("mapa.html")
 
-# 🚪 LOGOUT
+
+# -------------------------------------------------
+# LOGOUT
+# -------------------------------------------------
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
+# -------------------------------------------------
+# EJECUCIÓN LOCAL
+# -------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
