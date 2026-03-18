@@ -3,8 +3,10 @@ import os
 
 app = Flask(__name__)
 
-# 🔐 CLAVE SECRETA (desde Render)
 app.secret_key = os.environ.get("SECRET_KEY", "clave_default")
+
+USER = os.environ.get("APP_USER", "admin")
+PASSWORD = os.environ.get("APP_PASSWORD", "1234")
 
 # 🔐 CONFIGURACIÓN DE SESIÓN
 app.config['SESSION_PERMANENT'] = False
@@ -27,16 +29,20 @@ PASSWORD = os.environ.get("APP_PASSWORD", "1234")
 # LOGIN
 # -------------------------
 @app.route("/login", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def login():
+
     if request.method == "POST":
-        usuario = request.form.get("username")
-        password = request.form.get("password")
+
+        usuario = request.form["usuario"].strip()
+        password = request.form["password"].strip()
 
         if usuario == USER and password == PASSWORD:
+            session.clear()
             session["logged_in"] = True
             return redirect(url_for("mapa"))
         else:
-            return render_template("login.html", error="Credenciales incorrectas")
+            return "Usuario o contraseña incorrectos"
 
     return render_template("login.html")
 
