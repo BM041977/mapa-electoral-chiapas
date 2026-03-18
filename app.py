@@ -3,16 +3,16 @@ import os
 
 app = Flask(__name__)
 
-# 🔐 CLAVE SECRETA (desde Render o local)
+# 🔐 CLAVE SECRETA
 app.secret_key = os.environ.get("SECRET_KEY", "clave_local_segura")
 
-# 🔑 USUARIO Y PASSWORD (desde Render o local)
+# 🔑 USUARIO Y PASSWORD (Render o local)
 USER = os.environ.get("APP_USER", "Baldemar")
 PASSWORD = os.environ.get("APP_PASSWORD", "Victoria@Ever")
 
 
 # -------------------------------------------------
-# NO CACHE (para que no se vea el mapa al regresar)
+# NO CACHE (evita regresar al mapa con botón atrás)
 # -------------------------------------------------
 @app.after_request
 def no_cache(response):
@@ -23,7 +23,7 @@ def no_cache(response):
 
 
 # -------------------------------------------------
-# PROTEGER TODAS LAS RUTAS
+# PROTEGER RUTAS
 # -------------------------------------------------
 @app.before_request
 def proteger():
@@ -32,7 +32,7 @@ def proteger():
     if request.path == "/" or request.path.startswith("/static"):
         return
 
-    # si no ha iniciado sesión
+    # si no hay sesión → regresar a login
     if not session.get("logged_in"):
         return redirect(url_for("login"))
 
@@ -48,7 +48,11 @@ def login():
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "").strip()
 
-        # VALIDACIÓN
+        print("USUARIO INGRESADO:", usuario)
+        print("PASSWORD INGRESADO:", password)
+        print("USER CORRECTO:", USER)
+        print("PASSWORD CORRECTO:", PASSWORD)
+
         if usuario == USER and password == PASSWORD:
             session.clear()
             session["logged_in"] = True
@@ -60,7 +64,7 @@ def login():
 
 
 # -------------------------------------------------
-# MAPA (protegido)
+# MAPA (PROTEGIDO)
 # -------------------------------------------------
 @app.route("/mapa")
 def mapa():

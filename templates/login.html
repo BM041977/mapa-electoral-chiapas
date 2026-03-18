@@ -61,7 +61,8 @@
     <h2>Visor Electoral Chiapas</h2>
     <p>Iniciar sesión</p>
 
-    <form method="POST">
+    <!-- 🔥 FORMULARIO CORRECTO -->
+    <form method="POST" action="{{ url_for('login') }}">
 
         <input type="text" name="usuario" placeholder="Usuario" required>
         <br>
@@ -73,6 +74,7 @@
 
     </form>
 
+    <!-- MENSAJE DE ERROR -->
     {% if error %}
         <div class="error">{{ error }}</div>
     {% endif %}
