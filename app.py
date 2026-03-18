@@ -54,7 +54,7 @@ def login():
             session["logged_in"] = True
             return redirect("/mapa")
 
-        return "Usuario o contraseña incorrectos"
+        return render_template("login.html", error="Usuario o contraseña incorrectos")
 
     return render_template("login.html")
 
