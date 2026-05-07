@@ -1,33 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login</title>
+    <title>Login del Visor Electoral</title>
 </head>
 
-<body style="text-align:center; font-family:Arial;">
+<body style="text-align:center; font-family:Arial; background:#f5f5f5;">
 
-<h2>Login del Visor Electoral</h2>
+<!-- 🖼️ LOGO -->
+<div style="margin-top:40px;">
+    <img src="/static/logo.png" style="width:180px;">
+</div>
+
+<h2>Acceso al Sistema Electoral</h2>
 
 <form method="POST" action="/">
 
-Usuario:<br>
-<input type="text" name="usuario" required>
+    Usuario:<br>
+    <input type="text" name="usuario" required
+           style="padding:8px; width:220px;">
 
-<br><br>
+    <br><br>
 
-Contraseña:<br>
-<input type="password" name="password" required>
+    Contraseña:<br>
+    <input type="password" name="password" required
+           style="padding:8px; width:220px;">
 
-<br><br>
+    <br><br>
 
-<button type="submit">Entrar</button>
+    <button type="submit"
+            style="padding:10px 25px; cursor:pointer;">
+        Entrar
+    </button>
 
 </form>
 
 <br>
 
 {% if error %}
-<p style="color:red;">{{ error }}</p>
+<p style="color:red; font-weight:bold;">
+    {{ error }}
+</p>
 {% endif %}
 
 </body>

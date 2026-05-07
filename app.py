@@ -5,9 +5,14 @@ from datetime import timedelta
 
 app = Flask(__name__)
 
-# 🔐 CONFIGURACIÓN SEGURA
+# 🔐 CONFIGURACIÓN
 app.secret_key = os.environ.get("SECRET_KEY", "clave_super_segura")
-app.permanent_session_lifetime = timedelta(minutes=10)
+
+# ⏳ SESIÓN DE 3 MINUTOS
+app.permanent_session_lifetime = timedelta(minutes=3)
+
+# 👤 PROPIETARIO
+OWNER = "Baldemar Maza León"
 
 # 🔐 USUARIO Y PASSWORD
 USER = os.environ.get("APP_USER", "Baldemar")
@@ -27,23 +32,30 @@ def no_cache(response):
 @app.route("/", methods=["GET", "POST"])
 def login():
 
+    # 🔴 SIEMPRE PEDIR LOGIN
+    session.clear()
+
     if request.method == "POST":
+
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "").strip()
 
         if usuario == USER and password == PASSWORD:
-            session.clear()
-            session.permanent = True
+
             session["logged_in"] = True
+            session.permanent = False
+
             return redirect("/mapa")
 
-        return render_template("login.html", error="Usuario o contraseña incorrectos")
+        return render_template(
+            "login.html",
+            error="Usuario o contraseña incorrectos"
+        )
 
     return render_template("login.html")
 
-
 # -----------------------------
-# MAPA (PROTEGIDO)
+# MAPA
 # -----------------------------
 @app.route("/mapa")
 def mapa():
@@ -53,9 +65,8 @@ def mapa():
 
     return render_template("mapa_ligero.html")
 
-
 # -----------------------------
-# GEOJSON (VERSIÓN CORRECTA PARA RENDER)
+# GEOJSON
 # -----------------------------
 @app.route("/geojson/secciones")
 def geojson_secciones():
@@ -68,7 +79,6 @@ def geojson_secciones():
 
     return jsonify(data)
 
-
 # -----------------------------
 # LOGOUT
 # -----------------------------
@@ -77,9 +87,8 @@ def logout():
     session.clear()
     return redirect("/")
 
-
 # -----------------------------
-# EJECUCIÓN LOCAL
+# EJECUCIÓN
 # -----------------------------
 if __name__ == "__main__":
     app.run(debug=True)
