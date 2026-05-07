@@ -1,75 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mapa Electoral Chiapas</title>
     <meta charset="utf-8">
+    <title>Visor Electoral Chiapas</title>
 
+    <!-- Si usas Leaflet (mapa) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
     <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+        }
+
         #map {
-            height: 100vh;
             width: 100%;
+            height: 100vh;
         }
     </style>
 </head>
 
 <body>
 
+<!-- 🖼️ MAPA -->
 <div id="map"></div>
+
+<!-- ⏳ CONTADOR -->
+<div id="contador" style="
+position:fixed;
+top:10px;
+right:10px;
+background:white;
+padding:10px;
+border-radius:8px;
+z-index:9999;
+font-size:14px;
+box-shadow:0 0 5px gray;
+">
+⏳ Tiempo: 3:00
+</div>
+
+<!-- 🔒 LOGOUT AUTOMÁTICO -->
+<script>
+
+let tiempo = 180;
+
+function actualizar() {
+
+    let min = Math.floor(tiempo / 60);
+    let sec = tiempo % 60;
+
+    document.getElementById("contador").innerHTML =
+        "⏳ Tiempo: " + min + ":" + (sec < 10 ? "0" : "") + sec;
+
+    if (tiempo <= 0) {
+        alert("Sesión expirada");
+        window.location.href = "/logout";
+    }
+
+    tiempo--;
+}
+
+setInterval(actualizar, 1000);
+
+</script>
+
+<!-- 🗺️ LEAFLET MAPA (BASE) -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
-// 🗺️ 1. CREAR MAPA
-var map = L.map('map').setView([16.75, -93.11], 7);
+// 📍 CENTRO DEL MAPA (CHIAPAS)
+var map = L.map('map').setView([16.75, -93.13], 8);
 
-// 🌍 2. MAPA BASE
+// 🌍 BASE MAPA
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18
+    attribution: 'Mapa Electoral Chiapas'
 }).addTo(map);
 
-// 🎨 3. COLORES
-function color(partido) {
-    if (partido === "PAN") return "#004AB0";
-    if (partido === "PRI") return "#DC3545";
-    if (partido === "PVEM") return "#53AF31";
-    if (partido === "PT") return "#6f42c1";
-    if (partido === "MC") return "#fd7e14";
-    return "#999999";
-}
+// 📦 GEOJSON
+fetch('/geojson/secciones')
+    .then(res => res.json())
+    .then(data => {
 
-// 🧱 4. ESTILO
-function estilo(feature) {
-    return {
-        color: "#333",
-        weight: 1,
-        fillColor: color(feature.properties.PARTIDO_GANADOR),
-        fillOpacity: 0.7
-    };
-}
+        L.geoJSON(data, {
+            style: function(feature) {
+                return {
+                    color: "#3388ff",
+                    weight: 1,
+                    fillOpacity: 0.4
+                };
+            },
+            onEachFeature: function(feature, layer) {
 
-// 📡 5. CARGAR DATOS
-fetch("/geojson/secciones")
-.then(res => res.json())
-.then(data => {
+                layer.bindPopup(
+                    "<b>Municipio:</b> " + (feature.properties.MUNICIPIO || "N/A") +
+                    "<br><b>Sección:</b> " + (feature.properties.SECCION || "N/A") +
+                    "<br><b>Votación:</b> " + (feature.properties.VOTACION_TOTAL || "N/A") +
+                    "<br><b>Ganador:</b> " + (feature.properties.PARTIDO_GANADOR || "N/A")
+                );
+            }
+        }).addTo(map);
 
-    L.geoJson(data, {
-
-        style: estilo,
-
-        onEachFeature: function(feature, layer) {
-            layer.bindPopup(
-                "Municipio: " + feature.properties.MUNICIPIO + "<br>" +
-                "Sección: " + feature.properties.SECCION + "<br>" +
-                "Votación: " + feature.properties.VOTACION_TOTAL + "<br>" +
-                "Ganador: " + feature.properties.PARTIDO_GANADOR
-            );
-        }
-
-    }).addTo(map);
-
-});
+    });
 
 </script>
 
