@@ -63,7 +63,7 @@ def mapa():
     if not session.get("logged_in"):
         return redirect("/")
 
-    return render_template("mapa_ligero 1.html")
+    return render_template("mapa_ligero.html")
 
 # -----------------------------
 # GEOJSON
