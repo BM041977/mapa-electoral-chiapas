@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, jsonify
 import os
+import json
 from datetime import timedelta
 
 app = Flask(__name__)
@@ -12,7 +13,7 @@ app.permanent_session_lifetime = timedelta(minutes=10)
 USER = os.environ.get("APP_USER", "Baldemar")
 PASSWORD = os.environ.get("APP_PASSWORD", "Victoria@Ever")
 
-# 🔒 EVITAR CACHE (CLAVE)
+# 🔒 EVITAR CACHE
 @app.after_request
 def no_cache(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -32,7 +33,7 @@ def login():
 
         if usuario == USER and password == PASSWORD:
             session.clear()
-            session.permanent = False  # 🔥 IMPORTANTE
+            session.permanent = True
             session["logged_in"] = True
             return redirect("/mapa")
 
@@ -50,7 +51,22 @@ def mapa():
     if not session.get("logged_in"):
         return redirect("/")
 
-    return render_template("mapa.html")
+    return render_template("mapa_ligero.html")
+
+
+# -----------------------------
+# GEOJSON (VERSIÓN CORRECTA PARA RENDER)
+# -----------------------------
+@app.route("/geojson/secciones")
+def geojson_secciones():
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(base_dir, "secciones_simplificado.geojson")
+
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    return jsonify(data)
 
 
 # -----------------------------

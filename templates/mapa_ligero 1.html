@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapa Electoral Chiapas</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script>
+
+// 🗺️ 1. CREAR MAPA
+var map = L.map('map').setView([16.75, -93.11], 7);
+
+// 🌍 2. MAPA BASE
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18
+}).addTo(map);
+
+// 🎨 3. COLORES
+function color(partido) {
+    if (partido === "PAN") return "#004AB0";
+    if (partido === "PRI") return "#DC3545";
+    if (partido === "PVEM") return "#53AF31";
+    if (partido === "PT") return "#6f42c1";
+    if (partido === "MC") return "#fd7e14";
+    return "#999999";
+}
+
+// 🧱 4. ESTILO
+function estilo(feature) {
+    return {
+        color: "#333",
+        weight: 1,
+        fillColor: color(feature.properties.PARTIDO_GANADOR),
+        fillOpacity: 0.7
+    };
+}
+
+// 📡 5. CARGAR DATOS
+fetch("/geojson/secciones")
+.then(res => res.json())
+.then(data => {
+
+    L.geoJson(data, {
+
+        style: estilo,
+
+        onEachFeature: function(feature, layer) {
+            layer.bindPopup(
+                "Municipio: " + feature.properties.MUNICIPIO + "<br>" +
+                "Sección: " + feature.properties.SECCION + "<br>" +
+                "Votación: " + feature.properties.VOTACION_TOTAL + "<br>" +
+                "Ganador: " + feature.properties.PARTIDO_GANADOR
+            );
+        }
+
+    }).addTo(map);
+
+});
+
+</script>
+
+</body>
+</html>
