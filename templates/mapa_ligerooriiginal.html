@@ -1,34 +1,7 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Mapa</title>
-    <style>
-        #contador {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: white;
-            padding: 10px 14px;
-            border-radius: 8px;
-            z-index: 9999;
-            font-size: 14px;
-            box-shadow: 0 0 5px gray;
-            font-family: sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        #contador.alerta {
-            background: #ffdddd;
-            color: #c00000;
-            font-weight: bold;
-            animation: parpadeo 1s infinite;
-        }
-        @keyframes parpadeo {
-            0%, 100% { opacity: 1; }
-            50%      { opacity: 0.4; }
-        }
-    </style>
-</head>
+    </head>
 
 <body>
 
@@ -36,42 +9,43 @@
 <div id="map"></div>
 
 <!-- ⏳ CONTADOR -->
-<div id="contador" aria-live="polite">⏳ Tiempo: 3:00</div>
+<div id="contador" style="
+position:fixed;
+top:10px;
+right:10px;
+background:white;
+padding:10px;
+border-radius:8px;
+z-index:9999;
+font-size:14px;
+box-shadow:0 0 5px gray;
+">
+⏳ Tiempo: 3:00
+</div>
 
 <!-- 🔒 LOGOUT AUTOMÁTICO -->
 <script>
-(function () {
-    const DURACION_MS     = 180_000;   // 3 minutos absolutos
-    const UMBRAL_ALERTA_S = 30;        // segundos restantes para ponerlo en rojo
-    const URL_LOGOUT      = "/logout"; // <-- cambiar si la URL real es otra
 
-    const expira   = Date.now() + DURACION_MS;
-    const contador = document.getElementById("contador");
-    let yaExpiro   = false;
-    let intervalo;
+let tiempo = 180;
 
-    function actualizar() {
-        const restante = Math.max(0, Math.ceil((expira - Date.now()) / 1000));
+function actualizar() {
 
-        const min = Math.floor(restante / 60);
-        const sec = restante % 60;
-        contador.textContent = "⏳ Tiempo: " + min + ":" + (sec < 10 ? "0" : "") + sec;
+    let min = Math.floor(tiempo / 60);
+    let sec = tiempo % 60;
 
-        if (restante <= UMBRAL_ALERTA_S && restante > 0) {
-            contador.classList.add("alerta");
-        }
+    document.getElementById("contador").innerHTML =
+        "⏳ Tiempo: " + min + ":" + (sec < 10 ? "0" : "") + sec;
 
-        if (restante <= 0 && !yaExpiro) {
-            yaExpiro = true;
-            clearInterval(intervalo);
-            alert("Sesión expirada");
-            window.location.href = URL_LOGOUT;
-        }
+    if (tiempo <= 0) {
+        alert("Sesión expirada");
+        window.location.href = "/logout";
     }
 
-    actualizar();                          // pinta inmediato, sin perder 1s
-    intervalo = setInterval(actualizar, 1000);
-})();
+    tiempo--;
+}
+
+setInterval(actualizar, 1000);
+
 </script>
 
 <!-- 🗺️ LEAFLET MAPA (BASE) -->
